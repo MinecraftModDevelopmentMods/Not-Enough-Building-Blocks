@@ -1,0 +1,15 @@
+[{
+  "modid": "notenoughbb",
+  "name": "Not Enough Building Blocks",
+  "description": "Not Enough Building Blocks... Never Enough Building Blocks!",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": [ "Face_of_Cat", "Late Night ModCrafters" ],
+  "credits": "The Forge and FML guys and everyone's moms.",
+  "logoFile": "",
+  "screenshots": [],
+  "requiredMods": [],
+  "dependencies": []
+}]
