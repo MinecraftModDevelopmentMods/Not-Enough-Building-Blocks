@@ -7,7 +7,6 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.Vec2f
 import net.minecraft.util.math.Vec3d
 import net.minecraftforge.common.model.TRSRTransformation
-import net.ndrei.teslacorelib.render.selfrendering.RawCube
 import net.ndrei.teslacorelib.render.selfrendering.RawQuad
 import javax.vecmath.Matrix4d
 
@@ -28,7 +27,7 @@ class RawLump {
 
         this.faces.forEach { it.bake(rawrs, transform) }
 
-        rawrs.mapTo(quads) { it.applyMatrix(matrix ?: Matrix4d().also { it.setIdentity() }).bake(format) }
+        rawrs.mapTo(quads) { it.applyMatrix(matrix ?: (Matrix4d().also { it.setIdentity() })).bake(format) }
     }
 }
 

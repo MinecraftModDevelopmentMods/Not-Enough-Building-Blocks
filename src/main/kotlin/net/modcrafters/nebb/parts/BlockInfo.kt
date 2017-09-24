@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 
 open class BlockInfo private constructor(val parts: Array<PartInfo>, private val cacheKeyTransformer: (String) -> String) : INBTSerializable<NBTTagCompound> {
     fun getCacheKey() =
-        this.parts.fold("") { str, it -> str + "::${it.getCacheKey()}" }
+        this.cacheKeyTransformer(this.parts.fold("") { str, it -> str + "::${it.getCacheKey()}" })
 
     //#region builder
 

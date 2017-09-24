@@ -184,7 +184,6 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
     //#endregion
 
     companion object {
-        @JvmStatic
         val BLOCK_INFO = BlockInfoProperty("block_info")
     }
 }
