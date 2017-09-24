@@ -2,7 +2,6 @@ package net.modcrafters.nebb.parts
 
 import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
-import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.block.model.IBakedModel
 import net.minecraft.client.renderer.vertex.VertexFormat
@@ -13,8 +12,8 @@ import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.model.TRSRTransformation
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.common.util.INBTSerializable
+import net.modcrafters.nebb.getSprite
 import net.ndrei.teslacorelib.render.selfrendering.RawCube
-import java.util.*
 
 open class PartInfo(val name: String, defaultBlock: IBlockState, vararg val bigAABB: BigAABB) : INBTSerializable<NBTTagCompound> {
     private var _block: IBlockState = defaultBlock
@@ -40,9 +39,7 @@ open class PartInfo(val name: String, defaultBlock: IBlockState, vararg val bigA
 
     protected fun bakeAABB(quads: MutableList<BakedQuad>, aabb: BigAABB, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
         EnumFacing.VALUES.fold(RawCube(aabb.from, aabb.to).autoUV()) { cube, it ->
-            val modelQuads = partBlockModel.getQuads(this.block, it, Random().nextLong())
-            val texture = modelQuads.firstOrNull { q -> q.face == it }?.sprite ?: Minecraft.getMinecraft().textureMapBlocks.missingSprite
-            cube.addFace(it).sprite(texture)
+            cube.addFace(it).sprite(partBlockModel.getSprite(this.block, it))
         }.bake(quads, vertexFormat, transform)
     }
 
