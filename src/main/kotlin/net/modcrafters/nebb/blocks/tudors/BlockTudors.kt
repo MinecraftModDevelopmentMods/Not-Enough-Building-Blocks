@@ -6,4 +6,4 @@ import net.ndrei.teslacorelib.render.selfrendering.SelfRenderingBlock
 
 @AutoRegisterBlock
 @SelfRenderingBlock(false)
-object BlockTudors : BaseBlock<TileTudors>("tudors", TileTudors::class.java)
+object BlockTudors : BaseBlock<TileTudors>("tudors", TileTudors::class.java, { TileTudors.getModel(it) })

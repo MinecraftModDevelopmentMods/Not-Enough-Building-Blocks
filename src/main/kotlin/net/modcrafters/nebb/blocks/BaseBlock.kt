@@ -30,11 +30,12 @@ import net.minecraftforge.fml.relauncher.SideOnly
 import net.minecraftforge.registries.IForgeRegistry
 import net.modcrafters.nebb.MOD_ID
 import net.modcrafters.nebb.NEBBMod
+import net.modcrafters.nebb.parts.BlockInfo
 import net.ndrei.teslacorelib.blocks.RegisteredBlock
 import net.ndrei.teslacorelib.render.selfrendering.IBakery
 import net.ndrei.teslacorelib.render.selfrendering.ISelfRenderingBlock
 
-abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClass: Class<T>)
+abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClass: Class<T>, private val itemModelCreator: (ItemStack) -> BlockInfo)
     : RegisteredBlock(MOD_ID, NEBBMod.creativeTab, registryName, Material.ROCK), ITileEntityProvider, ISelfRenderingBlock {
 
     init {
@@ -75,6 +76,16 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
             override fun getQuads(state: IBlockState?, stack: ItemStack?, side: EnumFacing?, vertexFormat: VertexFormat, transform: TRSRTransformation): MutableList<BakedQuad> {
                 val quads = mutableListOf<BakedQuad>()
                 val blockInfo = (state as? IExtendedBlockState)?.getValue(BLOCK_INFO)
+                    .let {
+                        if ((it == null) && (stack != null)) {
+                            // item stack rendering
+                            this@BaseBlock.itemModelCreator(stack)
+                        }
+                        else {
+                            // block state rendering
+                            it
+                        }
+                    }
                 blockInfo?.getBakery()?.getQuads(state, stack, side, vertexFormat, transform)?.mapTo(quads) { it }
                 return quads
             }
