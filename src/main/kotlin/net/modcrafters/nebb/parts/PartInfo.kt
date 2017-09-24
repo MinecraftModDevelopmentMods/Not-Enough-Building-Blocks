@@ -2,21 +2,23 @@ package net.modcrafters.nebb.parts
 
 import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.block.model.IBakedModel
 import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.init.Blocks
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.model.TRSRTransformation
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.common.util.INBTSerializable
+import net.ndrei.teslacorelib.render.selfrendering.RawCube
+import java.util.*
 
-class PartInfo private constructor(val name: String, defaultBlock: IBlockState, val bigAABB: Array<BigAABB>) : INBTSerializable<NBTTagCompound> {
+open class PartInfo(val name: String, defaultBlock: IBlockState, vararg val bigAABB: BigAABB) : INBTSerializable<NBTTagCompound> {
     private var _block: IBlockState = defaultBlock
     private var _cachedKey: String? = null
-    var bakery: ((MutableList<BakedQuad>, PartInfo, IBakedModel, VertexFormat, TRSRTransformation) -> Unit)? = null
-        private set
 
     fun getCacheKey(): String {
         if (this._cachedKey.isNullOrBlank()) {
@@ -32,14 +34,16 @@ class PartInfo private constructor(val name: String, defaultBlock: IBlockState, 
             this._cachedKey = null
         }
 
-    fun setBakery(bakery: (MutableList<BakedQuad>, PartInfo, IBakedModel, VertexFormat, TRSRTransformation) -> Unit): PartInfo {
-        this.bakery = bakery
-        return this
+    open fun bakePartQuads(quads: MutableList<BakedQuad>, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
+        this.bigAABB.forEach { this.bakeAABB(quads, it, partBlockModel, vertexFormat, transform) }
     }
 
-    companion object {
-        fun build(name: String, block: IBlockState, vararg bigAABB: BigAABB) =
-            PartInfo(name, block, bigAABB.map { it }.toTypedArray())
+    protected fun bakeAABB(quads: MutableList<BakedQuad>, aabb: BigAABB, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
+        EnumFacing.VALUES.fold(RawCube(aabb.from, aabb.to).autoUV()) { cube, it ->
+            val modelQuads = partBlockModel.getQuads(this.block, it, Random().nextLong())
+            val texture = modelQuads.firstOrNull { q -> q.face == it }?.sprite ?: Minecraft.getMinecraft().textureMapBlocks.missingSprite
+            cube.addFace(it).sprite(texture)
+        }.bake(quads, vertexFormat, transform)
     }
 
     //#region serialization

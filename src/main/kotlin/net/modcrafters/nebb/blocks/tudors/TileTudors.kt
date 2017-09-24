@@ -1,18 +1,20 @@
 package net.modcrafters.nebb.blocks.tudors
 
-import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.block.model.IBakedModel
+import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.init.Blocks
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.Vec3d
+import net.minecraftforge.common.model.TRSRTransformation
 import net.minecraftforge.common.util.Constants
 import net.modcrafters.nebb.blocks.BaseTile
+import net.modcrafters.nebb.getSprite
 import net.modcrafters.nebb.parts.BigAABB
 import net.modcrafters.nebb.parts.BlockInfo
 import net.modcrafters.nebb.parts.PartInfo
 import net.ndrei.teslacorelib.render.selfrendering.RawCube
-import java.util.*
 import javax.vecmath.Matrix4d
 import javax.vecmath.Vector3d
 
@@ -22,11 +24,11 @@ class TileTudors : BaseTile() {
     override fun createBlockInfo(): BlockInfo {
         val builder = BlockInfo.getBuilder()
 
-        builder.add(PartInfo.build(PART_CENTER, Blocks.WOOL.defaultState,
+        builder.add(PartInfo(PART_CENTER, Blocks.WOOL.defaultState,
             BigAABB.withSize(width, width, width, 32 - width * 2, 32 - width * 2, 32 - width * 2)
         ))
 
-        builder.add(PartInfo.build(PART_FRAME, Blocks.PLANKS.defaultState,
+        builder.add(object: PartInfo(PART_FRAME, Blocks.PLANKS.defaultState,
             // vertical
             BigAABB.withSize(0.0, 0.0, 0.0, width, 32.0, width),
             BigAABB.withSize(32.0 - width, 0.0, 0.0, width, 32.0, width),
@@ -44,10 +46,9 @@ class TileTudors : BaseTile() {
             BigAABB.withSize(32.0 - width, 32.0 - width, width, width, width, 32.0 - width * 2),
             BigAABB.withSize(width, 32.0 - width, 32.0 - width, 32.0 - width * 2, width, width),
             BigAABB.withSize(0.0, 32.0 - width, width, width, width, 32.0 - width * 2)
-        ).setBakery { quads, part, model, vertexFormat, transform ->
-                fun IBakedModel.getPlankFace(it: EnumFacing) =
-                    this.getQuads(part.block, it, Random().nextLong())
-                        .firstOrNull { q -> q.face == it }?.sprite ?: Minecraft.getMinecraft().textureMapBlocks.missingSprite
+        ) {
+            override fun bakePartQuads(quads: MutableList<BakedQuad>, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
+                super.bakePartQuads(quads, partBlockModel, vertexFormat, transform)
 
                 EnumFacing.HORIZONTALS.forEach {
                     val matrix = Matrix4d()
@@ -81,12 +82,12 @@ class TileTudors : BaseTile() {
                     }
 
                     RawCube(Vec3d(x1 - 16.0, -4.0 - 16.0, z1 - 16.0), Vec3d(x2 - 16.0, 36.0 - 16.0, z2 - 16.0))
-                        .addFace(it).sprite(model.getPlankFace(it)).uv(7f, 0f, 8f, 16f)
-                        .addFace(it.rotateY()).sprite(model.getPlankFace(it.rotateY())).uv(7f, 0f, 8f, 16f)
-                        .addFace(it.rotateYCCW()).sprite(model.getPlankFace(it.rotateYCCW())).uv(7f, 0f, 8f, 16f)
+                        .addFace(it).sprite(partBlockModel.getSprite(this.block, it)).uv(7f, 0f, 8f, 16f)
+                        .addFace(it.rotateY()).sprite(partBlockModel.getSprite(this.block, it.rotateY())).uv(7f, 0f, 8f, 16f)
+                        .addFace(it.rotateYCCW()).sprite(partBlockModel.getSprite(this.block, it.rotateYCCW())).uv(7f, 0f, 8f, 16f)
                         .bake(quads, vertexFormat, transform, matrix)
                 }
-
+            }
         })
 
         builder.setCacheKeyTransformer { "${this@TileTudors.width}$it" }

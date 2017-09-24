@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model.BakedQuad
-import net.minecraft.client.renderer.block.model.IBakedModel
 import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
@@ -15,10 +14,8 @@ import net.minecraftforge.common.util.Constants
 import net.minecraftforge.common.util.INBTSerializable
 import net.modcrafters.nebb.NEBBMod
 import net.ndrei.teslacorelib.render.selfrendering.IBakery
-import net.ndrei.teslacorelib.render.selfrendering.RawCube
 import net.ndrei.teslacorelib.render.selfrendering.combine
 import net.ndrei.teslacorelib.render.selfrendering.static
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 open class BlockInfo private constructor(val parts: Array<PartInfo>, private val cacheKeyTransformer: (String) -> String) : INBTSerializable<NBTTagCompound> {
@@ -94,29 +91,15 @@ open class BlockInfo private constructor(val parts: Array<PartInfo>, private val
                 val quads = mutableListOf<BakedQuad>()
                 val model = Minecraft.getMinecraft().blockRendererDispatcher.blockModelShapes.getModelForState(part.block)
 
-                this@BlockInfo.bakePartQuads(quads, part, model, vertexFormat, transform)
+                part.bakePartQuads(quads, model, vertexFormat, transform)
 
                 return quads
             }
         }
 
-    private fun bakePartQuads(quads: MutableList<BakedQuad>, part: PartInfo, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
-        part.bigAABB.forEach {
-            EnumFacing.VALUES.fold(RawCube(it.from, it.to).autoUV()) { cube, it ->
-                val modelQuads = partBlockModel.getQuads(part.block, it, Random().nextLong())
-                val texture = modelQuads.firstOrNull { q -> q.face == it }?.sprite ?: Minecraft.getMinecraft().textureMapBlocks.missingSprite
-                cube.addFace(it).sprite(texture)
-            }.bake(quads, vertexFormat, transform)
-        }
-
-        if (part.bakery != null) {
-            part.bakery!!(quads, part, partBlockModel, vertexFormat, transform)
-        }
-    }
-
-    private val bakeries = CacheBuilder.newBuilder().expireAfterAccess(42, TimeUnit.SECONDS).build<String, IBakery>()
-
     companion object {
         fun getBuilder() = Builder()
+
+        private val bakeries = CacheBuilder.newBuilder().expireAfterAccess(42, TimeUnit.SECONDS).build<String, IBakery>()
     }
 }
