@@ -102,7 +102,6 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
     override fun doesSideBlockRendering(state: IBlockState?, world: IBlockAccess?, pos: BlockPos?, face: EnumFacing?) = false
     override fun shouldSideBeRendered(blockState: IBlockState?, blockAccess: IBlockAccess?, pos: BlockPos?, side: EnumFacing?) = true
 
-
     //#endregion
 
     //#region RAY TRACE

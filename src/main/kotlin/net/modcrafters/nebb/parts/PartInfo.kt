@@ -2,6 +2,7 @@ package net.modcrafters.nebb.parts
 
 import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
+import net.minecraft.client.renderer.RenderGlobal
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.block.model.IBakedModel
 import net.minecraft.client.renderer.vertex.VertexFormat
@@ -9,6 +10,8 @@ import net.minecraft.init.Blocks
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ResourceLocation
+import net.minecraft.util.math.Vec3d
+import net.minecraftforge.client.event.DrawBlockHighlightEvent
 import net.minecraftforge.common.model.TRSRTransformation
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.common.util.INBTSerializable
@@ -18,6 +21,8 @@ import net.ndrei.teslacorelib.render.selfrendering.RawCube
 open class PartInfo(val name: String, defaultBlock: IBlockState, vararg val bigAABB: BigAABB) : INBTSerializable<NBTTagCompound> {
     private var _block: IBlockState = defaultBlock
     private var _cachedKey: String? = null
+
+    //#region rendering
 
     fun getCacheKey(): String {
         if (this._cachedKey.isNullOrBlank()) {
@@ -41,6 +46,16 @@ open class PartInfo(val name: String, defaultBlock: IBlockState, vararg val bigA
         EnumFacing.VALUES.fold(RawCube(aabb.from, aabb.to).autoUV()) { cube, it ->
             cube.addFace(it).sprite(partBlockModel.getSprite(this.block, it))
         }.bake(quads, vertexFormat, transform)
+    }
+
+    //#endregion
+
+    open fun renderOutline(ev: DrawBlockHighlightEvent, offset: Vec3d) {
+        this.bigAABB.forEach {
+            RenderGlobal.drawSelectionBoundingBox(
+                it.small().offset(offset)
+                , 0.0f, 1.0f, 0.0f, 0.4f)
+        }
     }
 
     //#region serialization
