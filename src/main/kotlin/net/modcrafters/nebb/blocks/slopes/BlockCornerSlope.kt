@@ -6,4 +6,4 @@ import net.ndrei.teslacorelib.render.selfrendering.SelfRenderingBlock
 
 @AutoRegisterBlock
 @SelfRenderingBlock(false, false)
-object BlockSimpleSlope : BaseOrientedBlock<TileSimpleSlope>("simple_slope", TileSimpleSlope::class.java, { TileSimpleSlope.getModel(it) }, true)
+object BlockCornerSlope : BaseOrientedBlock<TileCornerSlope>("corner_slope", TileCornerSlope::class.java, { TileCornerSlope.getModel(it) }, true)

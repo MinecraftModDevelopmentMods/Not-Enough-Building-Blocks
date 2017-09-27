@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model.BakedQuad
+import net.minecraft.client.renderer.block.statemap.DefaultStateMapper
 import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
@@ -70,12 +71,15 @@ open class BlockInfo private constructor(val parts: Array<PartInfo>, private val
 
     //#endregion
 
+    fun IBlockState.getPropertyString() = DefaultStateMapper().getPropertyString(this.properties)
+
     fun getBakery(): IBakery {
         return object : IBakery {
             override fun getQuads(state: IBlockState?, stack: ItemStack?, side: EnumFacing?, vertexFormat: VertexFormat, transform: TRSRTransformation): MutableList<BakedQuad> {
 //                NEBBMod.logger.info("Getting model for: ${this@BlockInfo.getCacheKey()}")
-                return bakeries.get(this@BlockInfo.getCacheKey(), {
-                    NEBBMod.logger.info("Creating model for: ${this@BlockInfo.getCacheKey()}")
+                val cacheKey = this@BlockInfo.getCacheKey() + "::${if (state != null) state.getPropertyString() else "[no state]"}"
+                return bakeries.get(cacheKey, {
+                    NEBBMod.logger.info("Creating model for: ${cacheKey}")
                     this@BlockInfo.parts
                         .map { getBakery(it) }
                         .combine()

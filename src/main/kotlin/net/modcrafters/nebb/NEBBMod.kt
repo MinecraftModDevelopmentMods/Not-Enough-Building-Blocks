@@ -42,6 +42,8 @@ object NEBBMod {
         ).forEach {
             TeslaCoreLibConfig.setDefaultFlag(it, true)
         }
+
+        this.proxy.construction(event)
     }
 
     @Mod.EventHandler

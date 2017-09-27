@@ -23,19 +23,19 @@ import net.modcrafters.nebb.parts.BlockInfo
 import net.modcrafters.nebb.parts.PartInfo
 import net.ndrei.teslacorelib.blocks.AxisAlignedBlock
 
-class TileSimpleSlope : BaseTile() {
+class TileCornerSlope : BaseTile() {
     override fun createBlockInfo(): BlockInfo {
-        return TileSimpleSlope.getModel(mapOf(), this)
+        return TileCornerSlope.getModel(mapOf(), this)
     }
 
     companion object {
         const val PART_SLOPE = "slope"
 
         fun getModel(stack: ItemStack): BlockInfo {
-            return TileSimpleSlope.getModel(mapOf())
+            return TileCornerSlope.getModel(mapOf())
         }
 
-        private fun getModel(textureMap: Map<String, IBlockState>, tile: TileSimpleSlope? = null): BlockInfo {
+        private fun getModel(textureMap: Map<String, IBlockState>, tile: TileCornerSlope? = null): BlockInfo {
             val builder = BlockInfo.getBuilder()
 
             val orientation = tile?.world?.getBlockState(tile.pos)?.getValue(AxisAlignedBlock.FACING) ?: EnumFacing.NORTH
@@ -47,20 +47,6 @@ class TileSimpleSlope : BaseTile() {
                 override fun bakePartQuads(quads: MutableList<BakedQuad>, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
                     val lump = RawLump()
 
-                    val left = EnumFacing.getFacingFromAxis(EnumFacing.AxisDirection.NEGATIVE, EnumFacing.Axis.X)
-                    lump.addFace(
-                        arrayOf(
-                            Vec3d(0.0, 0.0, 0.0),
-                            Vec3d(0.0, 0.0, 32.0),
-                            Vec3d(0.0, 32.0, 32.0)
-                        ), arrayOf(
-                            Vec2f(0.0f, 16.0f),
-                            Vec2f(16.0f, 16.0f),
-                            Vec2f(16.0f, 0.0f)
-                        ),
-                        partBlockModel.getSprite(this.block, left), left
-                    )
-
                     val right = EnumFacing.getFacingFromAxis(EnumFacing.AxisDirection.POSITIVE, EnumFacing.Axis.X)
                     lump.addFace(
                         arrayOf(
@@ -68,10 +54,10 @@ class TileSimpleSlope : BaseTile() {
                             Vec3d(32.0, 32.0, 32.0),
                             Vec3d(32.0, 0.0, 32.0)
                         ), arrayOf(
-                            Vec2f(16.0f, 16.0f),
-                            Vec2f(0.0f, 0.0f),
-                            Vec2f(0.0f, 16.0f)
-                        ),
+                        Vec2f(16.0f, 16.0f),
+                        Vec2f(0.0f, 0.0f),
+                        Vec2f(0.0f, 16.0f)
+                    ),
                         partBlockModel.getSprite(this.block, right), right
                     )
 
@@ -80,13 +66,11 @@ class TileSimpleSlope : BaseTile() {
                         arrayOf(
                             Vec3d(32.0, 0.0, 32.0),
                             Vec3d(32.0, 32.0, 32.0),
-                            Vec3d(0.0, 32.0, 32.0),
                             Vec3d(0.0, 0.0, 32.0)
                         ), arrayOf(
                         Vec2f(0.0f, 16.0f),
                         Vec2f(0.0f, 0.0f),
-                        Vec2f(16.0f, 0.0f),
-                        Vec2f(16.0f, 16.0f)
+                        Vec2f(16.0f, 0.0f)
                     ),
                         partBlockModel.getSprite(this.block, back), back
                     )
@@ -94,14 +78,12 @@ class TileSimpleSlope : BaseTile() {
                     val front = EnumFacing.getFacingFromAxis(EnumFacing.AxisDirection.NEGATIVE, EnumFacing.Axis.Z)
                     lump.addFace(
                         arrayOf(
-                            Vec3d(0.0, 0.0, 0.0),
-                            Vec3d(0.0, 32.0, 32.0),
+                            Vec3d(0.0, 0.0, 32.0),
                             Vec3d(32.0, 32.0, 32.0),
                             Vec3d(32.0, 0.0, 0.0)
                         ), arrayOf(
                         Vec2f(0.0f, 16.0f),
-                        Vec2f(0.0f, 0.0f),
-                        Vec2f(16.0f, 0.0f),
+                        Vec2f(8.0f, 0.0f),
                         Vec2f(16.0f, 16.0f)
                     ),
                         partBlockModel.getSprite(this.block, front), front
@@ -110,15 +92,13 @@ class TileSimpleSlope : BaseTile() {
                     val bottom = EnumFacing.getFacingFromAxis(EnumFacing.AxisDirection.NEGATIVE, EnumFacing.Axis.Y)
                     lump.addFace(
                         arrayOf(
-                            Vec3d(0.0, 0.0, 0.0),
+                            Vec3d(0.0, 0.0, 32.0),
                             Vec3d(32.0, 0.0, 0.0),
-                            Vec3d(32.0, 0.0, 32.0),
-                            Vec3d(0.0, 0.0, 32.0)
+                            Vec3d(32.0, 0.0, 32.0)
                         ), arrayOf(
                         Vec2f(0.0f, 16.0f),
                         Vec2f(0.0f, 0.0f),
-                        Vec2f(16.0f, 0.0f),
-                        Vec2f(16.0f, 16.0f)
+                        Vec2f(16.0f, 0.0f)
                     ),
                         partBlockModel.getSprite(this.block, bottom), bottom
                     )
@@ -131,18 +111,14 @@ class TileSimpleSlope : BaseTile() {
                     val buffer = tessellator.buffer
                     buffer.begin(3, DefaultVertexFormats.POSITION_COLOR)
 
-                    buffer.pos(0.0, 0.0, 0.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
                     buffer.pos(0.0, 0.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(0.0, 1.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(1.0, 0.0, 0.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(1.0, 1.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(0.0, 0.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(1.0, 0.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
                     buffer.pos(1.0, 1.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
                     buffer.pos(1.0, 0.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
                     buffer.pos(1.0, 0.0, 0.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(0.0, 0.0, 0.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(0.0, 1.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(0.0, 0.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(1.0, 0.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(1.0, 0.0, 0.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(1.0, 1.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
 
                     GlStateManager.pushMatrix()
                     GlStateManager.translate(offset.x + 0.5, offset.y + 0.5, offset.z + 0.5)
@@ -161,7 +137,7 @@ class TileSimpleSlope : BaseTile() {
                 }
             })
 
-            builder.setCacheKeyTransformer { "slope_simple::${orientation.name}$it" }
+            builder.setCacheKeyTransformer { "slope_corner::${orientation.name}$it" }
 
             return builder.build()
         }

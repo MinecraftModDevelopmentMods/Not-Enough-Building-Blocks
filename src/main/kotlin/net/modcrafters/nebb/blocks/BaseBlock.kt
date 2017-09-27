@@ -58,7 +58,7 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
         return super.getExtendedState(state, world, pos)
     }
 
-    override fun createNewTileEntity(worldIn: World?, meta: Int): TileEntity? = this.tileClass.newInstance()
+    override fun createNewTileEntity(worldIn: World, meta: Int): TileEntity? = this.tileClass.newInstance()
 
     override fun registerBlock(registry: IForgeRegistry<Block>) {
         super.registerBlock(registry)
@@ -161,8 +161,8 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
         return aabb.grow(1 / 32.0).offset(pos)
     }
 
-    override fun onBlockActivated(worldIn: World, pos: BlockPos, state: IBlockState, playerIn: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
-        if (!playerIn.isSneaking) {
+    override fun onBlockActivated(worldIn: World?, pos: BlockPos?, state: IBlockState?, playerIn: EntityPlayer?, hand: EnumHand?, facing: EnumFacing?, hitX: Float, hitY: Float, hitZ: Float): Boolean {
+        if ((worldIn != null) && (pos != null) && (playerIn != null) && !playerIn.isSneaking) {
             val trace = rayTrace(worldIn, pos, playerIn)
             if (trace != null) {
                 val info = if (trace.subHit == 1) trace.hitInfo as? RayTraceInfo else null
