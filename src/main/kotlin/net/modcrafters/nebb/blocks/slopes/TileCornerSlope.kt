@@ -17,12 +17,12 @@ import net.minecraftforge.common.model.TRSRTransformation
 import net.modcrafters.nebb.blocks.BaseFlippableBlock
 import net.modcrafters.nebb.blocks.BaseHorizontalBlock
 import net.modcrafters.nebb.blocks.BaseTile
-import net.modcrafters.nebb.blocks.temp.RawLump
 import net.modcrafters.nebb.getSprite
 import net.modcrafters.nebb.parts.BigAABB
 import net.modcrafters.nebb.parts.BlockInfo
 import net.modcrafters.nebb.parts.PartInfo
 import net.modcrafters.nebb.parts.PartTextureInfo
+import net.ndrei.teslacorelib.render.selfrendering.RawLump
 
 class TileCornerSlope : BaseTile() {
     override fun createBlockInfo(): BlockInfo {
