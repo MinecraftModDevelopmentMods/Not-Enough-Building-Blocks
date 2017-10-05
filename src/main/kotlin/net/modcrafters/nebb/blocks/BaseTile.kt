@@ -1,13 +1,20 @@
 package net.modcrafters.nebb.blocks
 
+import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.EnumHand
 import net.minecraftforge.common.util.Constants
 import net.modcrafters.nebb.parts.BlockInfo
+import net.modcrafters.nebb.parts.PartInfo
+import net.ndrei.teslacorelib.blocks.multipart.IBlockPart
+import net.ndrei.teslacorelib.blocks.multipart.IBlockPartHitBox
+import net.ndrei.teslacorelib.blocks.multipart.IBlockPartProvider
+import net.ndrei.teslacorelib.utils.getHeldItem
 
-abstract class BaseTile : TileEntity() {
+abstract class BaseTile : TileEntity(), IBlockPartProvider {
     private var _blockInfo: BlockInfo? = null
 
     fun getBlockInfo(): BlockInfo {
@@ -32,7 +39,8 @@ abstract class BaseTile : TileEntity() {
                 if (block != null) {
                     val state = block.getStateFromMeta(stack.itemDamage)
                     if (state != null) {
-                        part.block = state
+                        this.getBlockInfo().setTexture(part.name, state)
+
                         this.markDirty()
                         this.world.markBlockRangeForRenderUpdate(this.pos, this.pos)
                         return true
@@ -43,16 +51,47 @@ abstract class BaseTile : TileEntity() {
         return false
     }
 
+    override fun getParts() = this.getBlockInfo().parts.toList()
+
+    override fun onPartActivated(player: EntityPlayer, hand: EnumHand, part: IBlockPart, hitBox: IBlockPartHitBox): Boolean {
+        if (part is PartInfo) {
+            return this.setPartTexture(part.name, player.getHeldItem())
+        }
+        return false
+    }
+
     //#region serialization
+
+    private var loaded = false
+    private var loadNBT: NBTTagCompound? = null
+
+    override fun onLoad() {
+        super.onLoad()
+
+        this.loaded = true
+        if (this.loadNBT != null) {
+            this.readBlockInfo(this.loadNBT!!)
+            this.loadNBT = null
+        }
+    }
 
     override fun readFromNBT(compound: NBTTagCompound) {
         super.readFromNBT(compound)
 
         if (compound.hasKey("block", Constants.NBT.TAG_COMPOUND)) {
-            this.getBlockInfo().deserializeNBT(compound.getCompoundTag("block"))
-            if (this.world?.isRemote == true) {
-                this.world.markBlockRangeForRenderUpdate(this.pos, this.pos)
-            }
+            this.readBlockInfo(compound.getCompoundTag("block"))
+        }
+    }
+
+    protected open fun readBlockInfo(nbt: NBTTagCompound) {
+        if (!this.loaded) {
+            this.loadNBT = nbt
+            return
+        }
+
+        this.getBlockInfo().deserializeNBT(nbt)
+        if (this.world?.isRemote == true) {
+            world.markBlockRangeForRenderUpdate(this.pos, this.pos)
         }
     }
 

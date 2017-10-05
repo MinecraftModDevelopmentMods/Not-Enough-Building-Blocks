@@ -16,6 +16,7 @@ import net.modcrafters.nebb.getSprite
 import net.modcrafters.nebb.parts.BigAABB
 import net.modcrafters.nebb.parts.BlockInfo
 import net.modcrafters.nebb.parts.PartInfo
+import net.modcrafters.nebb.parts.PartTextureInfo
 import net.ndrei.teslacorelib.render.selfrendering.RawCube
 import javax.vecmath.Matrix4d
 import javax.vecmath.Vector3d
@@ -41,11 +42,11 @@ class TileTudors : BaseTile() {
         private fun getModel(width: Double, textureMap: Map<String, IBlockState>): BlockInfo {
             val builder = BlockInfo.getBuilder()
 
-            builder.add(PartInfo(PART_CENTER, textureMap.getOrDefault(PART_CENTER, Blocks.WOOL.defaultState),
+            builder.add(PartInfo(PART_CENTER,
                 BigAABB.withSize(width, width, width, 32 - width * 2, 32 - width * 2, 32 - width * 2)
-            ))
+            ), textureMap.getOrDefault(PART_CENTER, Blocks.WOOL.defaultState))
 
-            builder.add(object: PartInfo(PART_FRAME, textureMap.getOrDefault(PART_FRAME, Blocks.PLANKS.defaultState),
+            builder.add(object: PartInfo(PART_FRAME,
                 // vertical
                 BigAABB.withSize(0.0, 0.0, 0.0, width, 32.0, width),
                 BigAABB.withSize(32.0 - width, 0.0, 0.0, width, 32.0, width),
@@ -64,8 +65,8 @@ class TileTudors : BaseTile() {
                 BigAABB.withSize(width, 32.0 - width, 32.0 - width, 32.0 - width * 2, width, width),
                 BigAABB.withSize(0.0, 32.0 - width, width, width, width, 32.0 - width * 2)
             ) {
-                override fun bakePartQuads(quads: MutableList<BakedQuad>, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
-                    super.bakePartQuads(quads, partBlockModel, vertexFormat, transform)
+                override fun bakePartQuads(texture: PartTextureInfo, quads: MutableList<BakedQuad>, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
+                    super.bakePartQuads(texture, quads, partBlockModel, vertexFormat, transform)
 
                     EnumFacing.HORIZONTALS.forEach {
                         val matrix = Matrix4d()
@@ -98,13 +99,14 @@ class TileTudors : BaseTile() {
                         }
 
                         RawCube(Vec3d(x1 - 16.0, -4.0 - 16.0, z1 - 16.0), Vec3d(x2 - 16.0, 36.0 - 16.0, z2 - 16.0))
-                            .addFace(it).sprite(partBlockModel.getSprite(this.block, it)).uv(7f, 0f, 8f, 16f)
-                            .addFace(it.rotateY()).sprite(partBlockModel.getSprite(this.block, it.rotateY())).uv(7f, 0f, 8f, 16f)
-                            .addFace(it.rotateYCCW()).sprite(partBlockModel.getSprite(this.block, it.rotateYCCW())).uv(7f, 0f, 8f, 16f)
+                            .addFace(it).sprite(partBlockModel.getSprite(texture.block, it)).uv(7f, 0f, 8f, 16f)
+                            .addFace(it.rotateY()).sprite(partBlockModel.getSprite(texture.block, it.rotateY())).uv(7f, 0f, 8f, 16f)
+                            .addFace(it.rotateYCCW()).sprite(partBlockModel.getSprite(texture.block, it.rotateYCCW())).uv(7f, 0f, 8f, 16f)
                             .bake(quads, vertexFormat, transform, matrix)
                     }
                 }
-            })
+            },
+                textureMap.getOrDefault(PART_FRAME, Blocks.PLANKS.defaultState))
 
             builder.setCacheKeyTransformer { "$width$it" }
 

@@ -14,14 +14,15 @@ import net.minecraft.util.math.Vec2f
 import net.minecraft.util.math.Vec3d
 import net.minecraftforge.client.event.DrawBlockHighlightEvent
 import net.minecraftforge.common.model.TRSRTransformation
-import net.modcrafters.nebb.blocks.BaseOrientedBlock
+import net.modcrafters.nebb.blocks.BaseFlippableBlock
+import net.modcrafters.nebb.blocks.BaseHorizontalBlock
 import net.modcrafters.nebb.blocks.BaseTile
 import net.modcrafters.nebb.blocks.temp.RawLump
 import net.modcrafters.nebb.getSprite
 import net.modcrafters.nebb.parts.BigAABB
 import net.modcrafters.nebb.parts.BlockInfo
 import net.modcrafters.nebb.parts.PartInfo
-import net.ndrei.teslacorelib.blocks.AxisAlignedBlock
+import net.modcrafters.nebb.parts.PartTextureInfo
 
 class TileSimpleSlope : BaseTile() {
     override fun createBlockInfo(): BlockInfo {
@@ -38,13 +39,13 @@ class TileSimpleSlope : BaseTile() {
         private fun getModel(textureMap: Map<String, IBlockState>, tile: TileSimpleSlope? = null): BlockInfo {
             val builder = BlockInfo.getBuilder()
 
-            val orientation = tile?.world?.getBlockState(tile.pos)?.getValue(AxisAlignedBlock.FACING) ?: EnumFacing.NORTH
-            val flip = tile?.world?.getBlockState(tile.pos)?.getValue(BaseOrientedBlock.FLIP_UP_DOWN) ?: false
+            val orientation = tile?.world?.getBlockState(tile.pos)?.getValue(BaseHorizontalBlock.FACING) ?: EnumFacing.NORTH
+            val flip = tile?.world?.getBlockState(tile.pos)?.getValue(BaseFlippableBlock.FLIP_UP_DOWN) ?: false
 
-            builder.add(object: PartInfo(PART_SLOPE, textureMap.getOrDefault(PART_SLOPE, Blocks.PLANKS.defaultState),
+            builder.add(object: PartInfo(PART_SLOPE,
                 BigAABB(0.0, 0.0, 0.0, BigAABB.SCALE, BigAABB.SCALE, BigAABB.SCALE)) {
 
-                override fun bakePartQuads(quads: MutableList<BakedQuad>, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
+                override fun bakePartQuads(texture: PartTextureInfo, quads: MutableList<BakedQuad>, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
                     val lump = RawLump()
 
                     val left = EnumFacing.getFacingFromAxis(EnumFacing.AxisDirection.NEGATIVE, EnumFacing.Axis.X)
@@ -58,7 +59,7 @@ class TileSimpleSlope : BaseTile() {
                             Vec2f(16.0f, 16.0f),
                             Vec2f(16.0f, 0.0f)
                         ),
-                        partBlockModel.getSprite(this.block, left), left
+                        partBlockModel.getSprite(texture.block, left), left
                     )
 
                     val right = EnumFacing.getFacingFromAxis(EnumFacing.AxisDirection.POSITIVE, EnumFacing.Axis.X)
@@ -72,7 +73,7 @@ class TileSimpleSlope : BaseTile() {
                             Vec2f(0.0f, 0.0f),
                             Vec2f(0.0f, 16.0f)
                         ),
-                        partBlockModel.getSprite(this.block, right), right
+                        partBlockModel.getSprite(texture.block, right), right
                     )
 
                     val back = EnumFacing.getFacingFromAxis(EnumFacing.AxisDirection.POSITIVE, EnumFacing.Axis.Z)
@@ -88,7 +89,7 @@ class TileSimpleSlope : BaseTile() {
                         Vec2f(16.0f, 0.0f),
                         Vec2f(16.0f, 16.0f)
                     ),
-                        partBlockModel.getSprite(this.block, back), back
+                        partBlockModel.getSprite(texture.block, back), back
                     )
 
                     val front = EnumFacing.getFacingFromAxis(EnumFacing.AxisDirection.NEGATIVE, EnumFacing.Axis.Z)
@@ -104,7 +105,7 @@ class TileSimpleSlope : BaseTile() {
                         Vec2f(16.0f, 0.0f),
                         Vec2f(16.0f, 16.0f)
                     ),
-                        partBlockModel.getSprite(this.block, front), front
+                        partBlockModel.getSprite(texture.block, front), front
                     )
 
                     val bottom = EnumFacing.getFacingFromAxis(EnumFacing.AxisDirection.NEGATIVE, EnumFacing.Axis.Y)
@@ -120,13 +121,13 @@ class TileSimpleSlope : BaseTile() {
                         Vec2f(16.0f, 0.0f),
                         Vec2f(16.0f, 16.0f)
                     ),
-                        partBlockModel.getSprite(this.block, bottom), bottom
+                        partBlockModel.getSprite(texture.block, bottom), bottom
                     )
 
                     lump.bake(quads, vertexFormat, transform)
                 }
 
-                override fun renderOutline(ev: DrawBlockHighlightEvent, offset: Vec3d) {
+                override fun renderOutline(ev: DrawBlockHighlightEvent) {
                     val tessellator = Tessellator.getInstance()
                     val buffer = tessellator.buffer
                     buffer.begin(3, DefaultVertexFormats.POSITION_COLOR)
@@ -144,6 +145,11 @@ class TileSimpleSlope : BaseTile() {
                     buffer.pos(1.0, 0.0, 0.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
                     buffer.pos(1.0, 1.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
 
+                    val dx = ev.player.lastTickPosX + (ev.player.posX - ev.player.lastTickPosX) * ev.partialTicks.toDouble()
+                    val dy = ev.player.lastTickPosY + (ev.player.posY - ev.player.lastTickPosY) * ev.partialTicks.toDouble()
+                    val dz = ev.player.lastTickPosZ + (ev.player.posZ - ev.player.lastTickPosZ) * ev.partialTicks.toDouble()
+                    val offset = Vec3d(dx, dy, dz).subtractReverse(Vec3d(ev.target.blockPos.x.toDouble(), ev.target.blockPos.y.toDouble(), ev.target.blockPos.z.toDouble()))
+
                     GlStateManager.pushMatrix()
                     GlStateManager.translate(offset.x + 0.5, offset.y + 0.5, offset.z + 0.5)
                     GlStateManager.rotate(when (orientation) {
@@ -159,7 +165,8 @@ class TileSimpleSlope : BaseTile() {
                     tessellator.draw()
                     GlStateManager.popMatrix()
                 }
-            })
+            },
+                textureMap.getOrDefault(PART_SLOPE, Blocks.PLANKS.defaultState))
 
             builder.setCacheKeyTransformer { "slope_simple::${orientation.name}$it" }
 

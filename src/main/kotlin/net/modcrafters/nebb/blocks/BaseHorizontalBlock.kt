@@ -1,6 +1,5 @@
 package net.modcrafters.nebb.blocks
 
-import net.minecraft.block.properties.PropertyEnum
 import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
@@ -12,32 +11,36 @@ import net.minecraft.world.World
 import net.minecraftforge.common.model.TRSRTransformation
 import net.minecraftforge.common.property.ExtendedBlockState
 import net.modcrafters.nebb.parts.BlockInfo
+import net.ndrei.teslacorelib.blocks.AxisAlignedBlock
+import net.ndrei.teslacorelib.getFacingFromEntity
 import net.ndrei.teslacorelib.render.selfrendering.IProvideVariantTransform
 import net.ndrei.teslacorelib.render.selfrendering.SelfRenderingBlocksRegistry
 
-abstract class BaseOrientedBlock<T: BaseTile>(registryName: String, tileClass: Class<T>, itemModelCreator: (ItemStack) -> BlockInfo)
+abstract class BaseHorizontalBlock<T: BaseTile>(registryName: String, tileClass: Class<T>, itemModelCreator: (ItemStack) -> BlockInfo)
     : BaseBlock<T>(registryName, tileClass, itemModelCreator), IProvideVariantTransform {
 
     //#region block state
 
     override fun createBlockState(): BlockStateContainer =
         ExtendedBlockState(this,
-            arrayOf(BaseOrientedBlock.FACING),
+            arrayOf(BaseHorizontalBlock.FACING),
             (super.createBlockState() as? ExtendedBlockState)?.unlistedProperties?.toTypedArray() ?: arrayOf())
 
     override fun getStateFromMeta(meta: Int): IBlockState {
-        val enumfacing = EnumFacing.getFront(meta and 7)
-        return this.defaultState.withProperty(BaseOrientedBlock.FACING, enumfacing)
+        val facing = EnumFacing.getFront(meta and 7).let {
+            if (it.axis == EnumFacing.Axis.Y) EnumFacing.NORTH else it
+        }
+        return this.defaultState.withProperty(BaseHorizontalBlock.FACING, facing)
     }
 
     override fun getMetaFromState(state: IBlockState) =
-        state.getValue(BaseOrientedBlock.FACING).index
+        state.getValue(BaseHorizontalBlock.FACING).index
 
     override fun getStateForPlacement(world: World?, pos: BlockPos?, facing: EnumFacing?, hitX: Float, hitY: Float, hitZ: Float,
                                       meta: Int, placer: EntityLivingBase?, hand: EnumHand?): IBlockState {
         val state = this.defaultState
-        if ((world != null) && (pos != null)) {
-            return state.withProperty(BaseOrientedBlock.FACING, facing?.opposite ?: EnumFacing.NORTH)
+        if ((world != null) && (pos != null) && (placer != null)) {
+            return state.withProperty(BaseHorizontalBlock.FACING, getFacingFromEntity(pos, placer))
         }
         return state
     }
@@ -46,8 +49,7 @@ abstract class BaseOrientedBlock<T: BaseTile>(registryName: String, tileClass: C
         var state = world.getBlockState(pos)
         if (state.block === this) {
             val tileEntity = world.getTileEntity(pos)
-            state = state.withProperty(BaseOrientedBlock.FACING,
-                EnumFacing.getFront(state.getValue(BaseOrientedBlock.FACING).index + 1))
+            state = state.withProperty(BaseHorizontalBlock.FACING, state.getValue(BaseHorizontalBlock.FACING).rotateY())
             world.setBlockState(pos, state)
             if (tileEntity != null) {
                 tileEntity.validate()
@@ -62,17 +64,15 @@ abstract class BaseOrientedBlock<T: BaseTile>(registryName: String, tileClass: C
 
     override fun getTransform(variant: String): TRSRTransformation {
         return when (variant) {
-            "facing=north" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(90, 180)
-            "facing=south" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(90, 0)
-            "facing=east" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(90, 270)
-            "facing=west" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(90, 90)
-            "facing=up" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(180, 0)
-            "facing=down" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 0) // <-- DEFAULT
+            "facing=north" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 0)
+            "facing=south" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 180)
+            "facing=east" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 90)
+            "facing=west" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 270)
             else -> TRSRTransformation.identity()
         }
     }
 
     companion object {
-        val FACING = PropertyEnum.create("facing", EnumFacing::class.java)
+        val FACING = AxisAlignedBlock.FACING
     }
 }
