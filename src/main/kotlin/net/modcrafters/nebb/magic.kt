@@ -9,3 +9,7 @@ import java.util.*
 fun IBakedModel.getSprite(state: IBlockState, it: EnumFacing) =
     this.getQuads(state, it, Random().nextLong())
         .firstOrNull { q -> q.face == it }?.sprite ?: Minecraft.getMinecraft().textureMapBlocks.missingSprite
+
+fun IBakedModel.getTintIndex(state: IBlockState, it: EnumFacing) =
+    this.getQuads(state, it, Random().nextLong())
+        .firstOrNull { q -> q.face == it }?.tintIndex ?: -1

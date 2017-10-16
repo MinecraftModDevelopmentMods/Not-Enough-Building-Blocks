@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraftforge.common.model.TRSRTransformation
 import net.minecraftforge.common.property.ExtendedBlockState
+import net.modcrafters.nebb.NEBBMod
 import net.modcrafters.nebb.parts.BlockInfo
 import net.ndrei.teslacorelib.blocks.AxisAlignedBlock
 import net.ndrei.teslacorelib.getFacingFromEntity
@@ -38,9 +39,10 @@ abstract class BaseFlippableBlock<T: BaseTile>(registryName: String, tileClass: 
     override fun getStateForPlacement(world: World?, pos: BlockPos?, facing: EnumFacing?, hitX: Float, hitY: Float, hitZ: Float,
                                       meta: Int, placer: EntityLivingBase?, hand: EnumHand?): IBlockState {
         val state = this.defaultState
-        if ((world != null) && (pos != null) && (placer != null)) {
-            return state.withProperty(AxisAlignedBlock.FACING, getFacingFromEntity(pos, placer))
-                .withProperty(FLIP_UP_DOWN, !((facing != EnumFacing.DOWN) && ((facing == EnumFacing.UP) || (hitY >= 0.5f))))
+        if ((world != null) && (pos != null) && (placer != null) && (facing != null)) {
+            NEBBMod.logger.info("HIT: $pos :: $facing :: $hitX, $hitY, $hitZ")
+            return state.withProperty(AxisAlignedBlock.FACING, if (facing.axis != EnumFacing.Axis.Y) facing.opposite else getFacingFromEntity(pos, placer).opposite)
+                .withProperty(FLIP_UP_DOWN, (facing == EnumFacing.DOWN) || (hitY >= 0.5f))
         }
         return state
     }
@@ -49,14 +51,14 @@ abstract class BaseFlippableBlock<T: BaseTile>(registryName: String, tileClass: 
 
     override fun getTransform(variant: String): TRSRTransformation {
         return when (variant) {
-            "facing=north,flip_up_down=false" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 0)
-            "facing=south,flip_up_down=false" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 180)
-            "facing=east,flip_up_down=false" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 90)
-            "facing=west,flip_up_down=false" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 270)
-            "facing=north,flip_up_down=true" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(180, 270)
-            "facing=south,flip_up_down=true" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(180, 90)
-            "facing=east,flip_up_down=true" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(180, 180)
-            "facing=west,flip_up_down=true" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(180, 0)
+            "facing=north,flip_up_down=false" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 180)
+            "facing=south,flip_up_down=false" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 0)
+            "facing=east,flip_up_down=false" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 270)
+            "facing=west,flip_up_down=false" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(0, 90)
+            "facing=north,flip_up_down=true" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(180, 0)
+            "facing=south,flip_up_down=true" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(180, 180)
+            "facing=east,flip_up_down=true" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(180, 90)
+            "facing=west,flip_up_down=true" -> SelfRenderingBlocksRegistry.SelfRenderingModelLoader.getTransform(180, 270)
             else -> TRSRTransformation.identity()
         }
     }

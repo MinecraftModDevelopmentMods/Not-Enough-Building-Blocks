@@ -112,14 +112,14 @@ class TileCornerSlope : BaseTile() {
                     val buffer = tessellator.buffer
                     buffer.begin(3, DefaultVertexFormats.POSITION_COLOR)
 
-                    buffer.pos(0.0, 0.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(1.0, 0.0, 0.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(1.0, 1.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(0.0, 0.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(1.0, 0.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(1.0, 1.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(1.0, 0.0, 1.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
-                    buffer.pos(1.0, 0.0, 0.0).color(0.0f, 1.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(0.0, 0.0, 1.0).color(0.0f, 0.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(1.0, 0.0, 0.0).color(0.0f, 0.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(1.0, 1.0, 1.0).color(0.0f, 0.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(0.0, 0.0, 1.0).color(0.0f, 0.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(1.0, 0.0, 1.0).color(0.0f, 0.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(1.0, 1.0, 1.0).color(0.0f, 0.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(1.0, 0.0, 1.0).color(0.0f, 0.0f, 0.0f, 0.4f).endVertex()
+                    buffer.pos(1.0, 0.0, 0.0).color(0.0f, 0.0f, 0.0f, 0.4f).endVertex()
 
                     val dx = event.player.lastTickPosX + (event.player.posX - event.player.lastTickPosX) * event.partialTicks.toDouble()
                     val dy = event.player.lastTickPosY + (event.player.posY - event.player.lastTickPosY) * event.partialTicks.toDouble()
@@ -127,15 +127,17 @@ class TileCornerSlope : BaseTile() {
                     val offset = Vec3d(dx, dy, dz).subtractReverse(Vec3d(event.target.blockPos.x.toDouble(), event.target.blockPos.y.toDouble(), event.target.blockPos.z.toDouble()))
 
                     GlStateManager.pushMatrix()
-                    GlStateManager.translate(offset.x + 0.5, offset.y + 0.5, offset.z + 0.5)
+                    GlStateManager.translate(offset.x + 0.5, offset.y + if (!flip) 0.5025 else 0.4075, offset.z + 0.5)
+                    GlStateManager.scale(1.025f, 1.025f, 1.025f)
                     GlStateManager.rotate(when (orientation) {
-                        EnumFacing.WEST -> 90.0f
-                        EnumFacing.SOUTH -> 180.0f
-                        EnumFacing.EAST -> 270.0f
+                        EnumFacing.WEST -> 270.0f
+                        EnumFacing.NORTH -> 180.0f
+                        EnumFacing.EAST -> 90.0f
                         else -> 0.0f
                     }, 0.0f, 1.0f, 0.0f)
                     if (flip) {
                         GlStateManager.rotate(180.0f, 1.0f, 0.0f, 0.0f)
+                        GlStateManager.rotate(180.0f, 0.0f, 1.0f, 0.0f)
                     }
                     GlStateManager.translate(-0.5, -0.5, -.5)
                     tessellator.draw()

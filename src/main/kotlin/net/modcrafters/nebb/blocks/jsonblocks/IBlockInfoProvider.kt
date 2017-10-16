@@ -2,7 +2,6 @@ package net.modcrafters.nebb.blocks.jsonblocks
 
 import net.minecraft.block.state.IBlockState
 import net.modcrafters.nebb.parts.BlockInfo
-import net.modcrafters.nebb.parts.PartInfo
 import net.ndrei.teslacorelib.render.selfrendering.IProvideVariantTransform
 import net.ndrei.teslacorelib.render.selfrendering.getPropertyString
 import javax.vecmath.Matrix4f
@@ -20,10 +19,10 @@ interface IBlockInfoProvider {
             this.info.parts.forEach { part ->
                 val texture = info.getBlock(part.name)
                 if (texture != null) {
-                    it.add(PartInfo(part.name, transform, *part.bigAABB), texture)
+                    it.add(part.clone(), texture)
                 }
                 else {
-                    it.add(PartInfo(part.name, transform, *part.bigAABB))
+                    it.add(part.clone())
                 }
             }
             it.setCacheKeyTransformer { this.info.cacheKeyTransformer(it) }

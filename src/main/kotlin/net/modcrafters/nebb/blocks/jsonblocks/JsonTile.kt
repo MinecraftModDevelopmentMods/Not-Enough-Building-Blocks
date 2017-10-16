@@ -13,7 +13,7 @@ class JsonTile : BaseTile() {
 
     override fun createBlockInfo(): BlockInfo {
         val block = (this.blockType ?: this.world.getBlockState(this.pos).block)
-            as? JsonOrientedBlock ?: throw InvalidClassException("JsonTile not linked to a JsonOrientedBlock!")
+            as? IBlockInfoProvider ?: throw InvalidClassException("JsonTile not linked to a IBlockInfoProvider!")
         return block.getInfoClone(this.world.getBlockState(this.pos))
     }
 

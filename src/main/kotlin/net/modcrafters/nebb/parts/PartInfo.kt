@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.util.EnumFacing
 import net.minecraftforge.common.model.TRSRTransformation
 import net.modcrafters.nebb.getSprite
+import net.modcrafters.nebb.getTintIndex
 import net.ndrei.teslacorelib.blocks.multipart.BlockPart
 import net.ndrei.teslacorelib.render.selfrendering.RawCube
 import javax.vecmath.Matrix4f
@@ -42,7 +43,9 @@ open class PartInfo(val name: String, val transform: Matrix4f, vararg val bigAAB
 
     protected fun bakeAABB(texture: PartTextureInfo, quads: MutableList<BakedQuad>, aabb: BigAABB, partBlockModel: IBakedModel, vertexFormat: VertexFormat, transform: TRSRTransformation) {
         EnumFacing.VALUES.fold(RawCube(aabb.from, aabb.to).autoUV()) { cube, it ->
-            cube.addFace(it).sprite(partBlockModel.getSprite(texture.block, it))
+            cube.addFace(it)
+                .sprite(partBlockModel.getSprite(texture.block, it))
+                .tint(partBlockModel.getTintIndex(texture.block, it))
         }.bake(quads, vertexFormat, transform)
     }
 
@@ -59,4 +62,6 @@ open class PartInfo(val name: String, val transform: Matrix4f, vararg val bigAAB
 
     fun transformed(matrix4f: Matrix4f) =
         PartInfo(this.name, matrix4f, *this.bigAABB)
+
+    open fun clone()= PartInfo(this.name, this.transform, *this.bigAABB)
 }

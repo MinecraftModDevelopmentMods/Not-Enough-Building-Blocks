@@ -6,6 +6,7 @@ import net.minecraft.block.material.Material
 import net.minecraft.block.state.BlockFaceShape
 import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.item.ItemStack
@@ -24,11 +25,12 @@ import net.modcrafters.nebb.MOD_ID
 import net.modcrafters.nebb.NEBBMod
 import net.modcrafters.nebb.parts.BlockInfo
 import net.ndrei.teslacorelib.blocks.MultiPartBlock
+import net.ndrei.teslacorelib.compatibility.IBlockColorDelegate
 import net.ndrei.teslacorelib.render.selfrendering.IBakery
 import net.ndrei.teslacorelib.render.selfrendering.ISelfRenderingBlock
 
 abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClass: Class<T>, private val itemModelCreator: (ItemStack) -> BlockInfo)
-    : MultiPartBlock(MOD_ID, NEBBMod.creativeTab, registryName, Material.ROCK), ITileEntityProvider, ISelfRenderingBlock {
+    : MultiPartBlock(MOD_ID, NEBBMod.creativeTab, registryName, Material.ROCK), ITileEntityProvider, ISelfRenderingBlock, IBlockColorDelegate {
 
     init {
         this.setLightOpacity(255)
@@ -98,6 +100,8 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
         // return super.getBlockFaceShape(worldIn, state, pos, face)
         return BlockFaceShape.UNDEFINED
     }
+
+    override fun getBlockLayer() = BlockRenderLayer.CUTOUT_MIPPED
 
     //#endregion
 
@@ -179,6 +183,18 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
 //    }
 
     //#endregion
+
+    override fun colorMultiplier(state: IBlockState, worldIn: IBlockAccess?, pos: BlockPos?, tintIndex: Int): Int {
+        val te = (if (pos != null) worldIn?.getTileEntity(pos) else null) as? BaseTile
+        if (te != null) {
+            val info = te.getBlockInfo()
+            val texture = info.getBlock(info.parts.first().name) // TODO: maybe look through all until you get a valid one
+            if (texture != null) {
+                return Minecraft.getMinecraft().blockColors.colorMultiplier(texture, worldIn, pos, tintIndex)
+            }
+        }
+        return -1
+    }
 
     companion object {
         val BLOCK_INFO = BlockInfoProperty("block_info")
