@@ -133,12 +133,26 @@ object JsonRegistry: IRegistryHandler {
 
         if (json.isJsonArray) {
             val array = json.asJsonArray
-            if (array.size() != 6)
-                throw JsonParseException("'$json' could not be parsed into 6 doubles.")
+            if (array.firstOrNull()?.isJsonArray == true) {
+                // multiple hit boxes
+                array.forEach {
+                    val arr = it.asJsonArray
+                    if (arr.size() != 6)
+                        throw JsonParseException("'$it' could not be parsed into 6 doubles.")
 
-            val coords = array
-                .map { if (it.isJsonPrimitive) it.asDouble else throw JsonParseException("'$json' could not be converted to float.") }
-            result.add(AxisAlignedBB(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]))
+                    val coords = arr
+                        .map { if (it.isJsonPrimitive) it.asDouble else throw JsonParseException("'$it' could not be converted to double.") }
+                    result.add(AxisAlignedBB(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]))
+                }
+            }
+            else {
+                if (array.size() != 6)
+                    throw JsonParseException("'$json' could not be parsed into 6 doubles.")
+
+                val coords = array
+                    .map { if (it.isJsonPrimitive) it.asDouble else throw JsonParseException("'$json' could not be converted to float.") }
+                result.add(AxisAlignedBB(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]))
+            }
         }
         else if (json.isJsonPrimitive) {
             val coords = json.asString.split(',').mapNotNull {
