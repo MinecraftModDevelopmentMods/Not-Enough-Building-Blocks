@@ -7,6 +7,7 @@ import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.common.util.INBTSerializable
+import net.modcrafters.nebb.blocks.DummyMeshBlock
 
 class PartTextureInfo(var block: IBlockState): INBTSerializable<NBTTagCompound> {
     constructor(nbt: NBTTagCompound): this(PartTextureInfo.getBlockState(nbt))
@@ -42,6 +43,6 @@ class PartTextureInfo(var block: IBlockState): INBTSerializable<NBTTagCompound> 
             }
         }
 
-        val DEFAULT by lazy { PartTextureInfo(Blocks.STONE.defaultState) }
+        val DEFAULT by lazy { PartTextureInfo(DummyMeshBlock.defaultState) }
     }
 }

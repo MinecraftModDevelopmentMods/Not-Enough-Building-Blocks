@@ -1,0 +1,10 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "nebb:dummy_mesh"
+  },
+  "variants": {
+    "normal": [{}],
+    "inventory": [{}]
+  }
+}
