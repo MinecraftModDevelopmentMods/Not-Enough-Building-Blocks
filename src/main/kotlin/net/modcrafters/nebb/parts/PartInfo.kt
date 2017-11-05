@@ -4,10 +4,13 @@ import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.block.model.IBakedModel
 import net.minecraft.client.renderer.vertex.VertexFormat
 import net.minecraft.util.EnumFacing
+import net.minecraftforge.client.event.DrawBlockHighlightEvent
 import net.minecraftforge.common.model.TRSRTransformation
+import net.modcrafters.nebb.blocks.BaseBlock
 import net.modcrafters.nebb.getSprite
 import net.modcrafters.nebb.getTintIndex
 import net.ndrei.teslacorelib.blocks.multipart.BlockPart
+import net.ndrei.teslacorelib.blocks.multipart.OutlineRenderUtil
 import net.ndrei.teslacorelib.render.selfrendering.RawCube
 import javax.vecmath.Matrix4f
 
@@ -64,4 +67,18 @@ open class PartInfo(val name: String, val transform: Matrix4f, vararg val bigAAB
         PartInfo(this.name, matrix4f, *this.bigAABB)
 
     open fun clone()= PartInfo(this.name, this.transform, *this.bigAABB)
+
+    override val outlineDepthCheck get() = false
+
+    override fun renderOutline(event: DrawBlockHighlightEvent) {
+        val state = event.player.world.getBlockState(event.target.blockPos)
+        if (state.block is BaseBlock<*>) {
+            val matrix = (state.block as? BaseBlock<*>)?.getTransformMatrix(state)
+            if (matrix != null) {
+                OutlineRenderUtil.renderDefaultOutline(event, this.transformed(matrix))
+                return
+            }
+        }
+        super.renderOutline(event)
+    }
 }

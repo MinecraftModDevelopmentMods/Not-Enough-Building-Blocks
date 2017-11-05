@@ -9,7 +9,6 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.vertex.VertexFormat
-import net.minecraft.entity.Entity
 import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.BlockRenderLayer
@@ -25,11 +24,15 @@ import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.registries.IForgeRegistry
 import net.modcrafters.nebb.MOD_ID
 import net.modcrafters.nebb.NEBBMod
+import net.modcrafters.nebb.parts.BigAABB
 import net.modcrafters.nebb.parts.BlockInfo
 import net.ndrei.teslacorelib.blocks.MultiPartBlock
 import net.ndrei.teslacorelib.compatibility.IBlockColorDelegate
 import net.ndrei.teslacorelib.render.selfrendering.IBakery
+import net.ndrei.teslacorelib.render.selfrendering.IProvideVariantTransform
 import net.ndrei.teslacorelib.render.selfrendering.ISelfRenderingBlock
+import net.ndrei.teslacorelib.render.selfrendering.getPropertyString
+import javax.vecmath.Matrix4f
 
 abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClass: Class<T>, private val itemModelCreator: (ItemStack) -> BlockInfo)
     : MultiPartBlock(MOD_ID, NEBBMod.creativeTab, registryName, Material.ROCK), ITileEntityProvider, ISelfRenderingBlock, IBlockColorDelegate {
@@ -107,10 +110,6 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
 
     //#endregion
 
-    override fun addCollisionBoxToList(state: IBlockState, worldIn: World, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: MutableList<AxisAlignedBB>, entityIn: Entity?, isActualState: Boolean) {
-        super.addCollisionBoxToList(state, worldIn, pos, entityBox, collidingBoxes, entityIn, isActualState)
-    }
-
     override fun colorMultiplier(state: IBlockState, worldIn: IBlockAccess?, pos: BlockPos?, tintIndex: Int): Int {
         val te = (if (pos != null) worldIn?.getTileEntity(pos) else null) as? BaseTile
         if (te != null) {
@@ -122,6 +121,22 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
         }
         return -1
     }
+
+    override fun transformCollisionAABB(aabb: AxisAlignedBB, state: IBlockState): AxisAlignedBB {
+        val matrix = this.getTransformMatrix(state)
+        return BigAABB.fromAABB(aabb).transform(matrix).aabb
+//        val from = aabb.min.toVector3f()
+//        val to = aabb.max.toVector3f()
+//        matrix.transform(from)
+//        matrix.transform(to)
+//        return AxisAlignedBB(from.toVec3d(), to.toVec3d())
+    }
+
+    fun getTransformMatrix(state: IBlockState)=
+        if (this is IProvideVariantTransform) {
+            this.getTransform(state.getPropertyString()).matrix
+        }
+        else Matrix4f().also { it.setIdentity() }
 
     companion object {
         val BLOCK_INFO = BlockInfoProperty("block_info")

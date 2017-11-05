@@ -4,6 +4,8 @@ import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.ndrei.teslacorelib.blocks.multipart.IBlockPartHitBox
+import net.ndrei.teslacorelib.render.selfrendering.div
+import net.ndrei.teslacorelib.render.selfrendering.times
 import net.ndrei.teslacorelib.render.selfrendering.toVec3d
 import net.ndrei.teslacorelib.render.selfrendering.toVector3f
 import javax.vecmath.Matrix4f
@@ -38,17 +40,33 @@ class BigAABB(val x1: Double, val y1: Double, val z1: Double, val x2: Double, va
     val to = Vec3d(this.x2, this.y2, this.z2)
 
     fun transform(matrix: Matrix4f): BigAABB {
-        val from = this.from.toVector3f()
-        val to = this.to.toVector3f()
-        from.add(Vector3f(-SCALE.toFloat() / 2, -SCALE.toFloat() / 2, -SCALE.toFloat() / 2))
-        to.add(Vector3f(-SCALE.toFloat() / 2, -SCALE.toFloat() / 2, -SCALE.toFloat() / 2))
+        val from = this.from.toVector3f() / SCALE.toFloat()
+        val to = this.to.toVector3f() / SCALE.toFloat()
+
         matrix.transform(from)
         matrix.transform(to)
-        from.add(Vector3f(SCALE.toFloat() / 2, SCALE.toFloat() / 2, SCALE.toFloat() / 2))
-        to.add(Vector3f(SCALE.toFloat() / 2, SCALE.toFloat() / 2, SCALE.toFloat() / 2))
 
-        val p1 = from.toVec3d()
-        val p2 = to.toVec3d()
+        val min = Vector3f(
+            Math.min(from.x, to.x),
+            Math.min(from.y, to.y),
+            Math.min(from.z, to.z)
+        )
+        val max = Vector3f(
+            Math.max(from.x, to.x),
+            Math.max(from.y, to.y),
+            Math.max(from.z, to.z)
+        )
+
+        while(min.x < 0) { min.x += 1; max.x += 1 }
+        while(min.y < 0) { min.y += 1; max.y += 1 }
+        while(min.z < 0) { min.z += 1; max.z += 1 }
+
+        while(max.x > 1) { min.x -= 1; max.x -= 1 }
+        while(max.y > 1) { min.y -= 1; max.y -= 1 }
+        while(max.z > 1) { min.z -= 1; max.z -= 1 }
+
+        val p1 = (min * SCALE.toFloat()).toVec3d()
+        val p2 = (max * SCALE.toFloat()).toVec3d()
         
         return BigAABB(
             Math.min(p1.x, p2.x),
