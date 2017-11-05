@@ -1,5 +1,6 @@
 package net.modcrafters.nebb.blocks
 
+import mcmultipart.api.slot.IPartSlot
 import net.minecraft.block.Block
 import net.minecraft.block.ITileEntityProvider
 import net.minecraft.block.material.Material
@@ -20,10 +21,12 @@ import net.minecraft.world.World
 import net.minecraftforge.common.model.TRSRTransformation
 import net.minecraftforge.common.property.ExtendedBlockState
 import net.minecraftforge.common.property.IExtendedBlockState
+import net.minecraftforge.fml.common.Optional
 import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.registries.IForgeRegistry
 import net.modcrafters.nebb.MOD_ID
 import net.modcrafters.nebb.NEBBMod
+import net.modcrafters.nebb.integrations.mcmp.MCMultiPartAddon
 import net.modcrafters.nebb.parts.BigAABB
 import net.modcrafters.nebb.parts.BlockInfo
 import net.ndrei.teslacorelib.blocks.MultiPartBlock
@@ -137,6 +140,9 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
             this.getTransform(state.getPropertyString()).matrix
         }
         else Matrix4f().also { it.setIdentity() }
+
+    @Optional.Method(modid = MCMultiPartAddon.MOD_ID)
+    abstract fun getMultipartSlot(state: IBlockState): IPartSlot
 
     companion object {
         val BLOCK_INFO = BlockInfoProperty("block_info")

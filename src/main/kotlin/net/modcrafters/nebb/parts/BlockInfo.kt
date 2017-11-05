@@ -11,7 +11,6 @@ import net.minecraft.util.EnumFacing
 import net.minecraftforge.common.model.TRSRTransformation
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.common.util.INBTSerializable
-import net.modcrafters.nebb.NEBBMod
 import net.ndrei.teslacorelib.render.selfrendering.IBakery
 import net.ndrei.teslacorelib.render.selfrendering.combine
 import net.ndrei.teslacorelib.render.selfrendering.getPropertyString
@@ -97,7 +96,7 @@ open class BlockInfo private constructor(val parts: Array<PartInfo>, val cacheKe
 //                NEBBMod.logger.info("Getting model for: ${this@BlockInfo.getCacheKey()}")
                 val cacheKey = this@BlockInfo.getCacheKey() + "::${if (state != null) state.getPropertyString() else "[no state]"}"
                 return bakeries.get(cacheKey, {
-                    NEBBMod.logger.info("Creating model for: ${cacheKey}")
+                    // NEBBMod.logger.info("Creating model for: ${cacheKey}")
                     this@BlockInfo.parts
                         .map { getBakery(it) }
                         .combine()

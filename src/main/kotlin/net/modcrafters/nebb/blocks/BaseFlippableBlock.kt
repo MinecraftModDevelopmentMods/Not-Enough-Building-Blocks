@@ -1,5 +1,7 @@
 package net.modcrafters.nebb.blocks
 
+import mcmultipart.api.slot.EnumEdgeSlot
+import mcmultipart.api.slot.IPartSlot
 import net.minecraft.block.properties.PropertyBool
 import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
@@ -11,7 +13,8 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraftforge.common.model.TRSRTransformation
 import net.minecraftforge.common.property.ExtendedBlockState
-import net.modcrafters.nebb.NEBBMod
+import net.minecraftforge.fml.common.Optional
+import net.modcrafters.nebb.integrations.mcmp.MCMultiPartAddon
 import net.modcrafters.nebb.parts.BlockInfo
 import net.ndrei.teslacorelib.blocks.AxisAlignedBlock
 import net.ndrei.teslacorelib.getFacingFromEntity
@@ -40,7 +43,7 @@ abstract class BaseFlippableBlock<T: BaseTile>(registryName: String, tileClass: 
                                       meta: Int, placer: EntityLivingBase?, hand: EnumHand?): IBlockState {
         val state = this.defaultState
         if ((world != null) && (pos != null) && (placer != null) && (facing != null)) {
-            NEBBMod.logger.info("HIT: $pos :: $facing :: $hitX, $hitY, $hitZ")
+//            NEBBMod.logger.info("HIT: $pos :: $facing :: $hitX, $hitY, $hitZ")
             return state.withProperty(AxisAlignedBlock.FACING, if (facing.axis != EnumFacing.Axis.Y) facing.opposite else getFacingFromEntity(pos, placer).opposite)
                 .withProperty(FLIP_UP_DOWN, (facing == EnumFacing.DOWN) || (hitY >= 0.5f))
         }
@@ -62,6 +65,13 @@ abstract class BaseFlippableBlock<T: BaseTile>(registryName: String, tileClass: 
             else -> TRSRTransformation.identity()
         }
     }
+
+    @Optional.Method(modid = MCMultiPartAddon.MOD_ID)
+    override fun getMultipartSlot(state: IBlockState): IPartSlot =
+        EnumEdgeSlot.fromFaces(
+            state.getValue(BaseHorizontalBlock.FACING),
+            if (state.getValue(BaseFlippableBlock.FLIP_UP_DOWN)) EnumFacing.DOWN else EnumFacing.UP
+        )
 
     override fun rotateBlock(world: World, pos: BlockPos, axis: EnumFacing): Boolean {
         var state = world.getBlockState(pos)

@@ -1,5 +1,7 @@
 package net.modcrafters.nebb.blocks
 
+import mcmultipart.api.slot.EnumFaceSlot
+import mcmultipart.api.slot.IPartSlot
 import net.minecraft.block.state.BlockStateContainer
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
@@ -10,6 +12,8 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraftforge.common.model.TRSRTransformation
 import net.minecraftforge.common.property.ExtendedBlockState
+import net.minecraftforge.fml.common.Optional
+import net.modcrafters.nebb.integrations.mcmp.MCMultiPartAddon
 import net.modcrafters.nebb.parts.BlockInfo
 import net.ndrei.teslacorelib.blocks.AxisAlignedBlock
 import net.ndrei.teslacorelib.getFacingFromEntity
@@ -44,6 +48,12 @@ abstract class BaseHorizontalBlock<T: BaseTile>(registryName: String, tileClass:
         }
         return state
     }
+
+    @Optional.Method(modid = MCMultiPartAddon.MOD_ID)
+    override fun getMultipartSlot(state: IBlockState): IPartSlot =
+        EnumFaceSlot.fromFace(
+            state.getValue(BaseHorizontalBlock.FACING)
+        )
 
     override fun rotateBlock(world: World, pos: BlockPos, axis: EnumFacing): Boolean {
         var state = world.getBlockState(pos)

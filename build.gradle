@@ -76,7 +76,7 @@ repositories {
     jcenter()
     maven { name='mine'; url='https://maven.modcrafters.net' }
     maven { name='forgelin'; url='http://maven.shadowfacts.net/' }
-
+    maven { name='mcmultipart'; url='http://maven.amadornes.com/' }
     maven { name='jei'; url="http://dvs1.progwml6.com/files/maven" }
 }
 
@@ -97,6 +97,9 @@ dependencies {
 
     deobfCompile "mezz.jei:jei_${project.minecraft_version}:${project.jei_version}:api"
     runtime "mezz.jei:jei_${project.minecraft_version}:${project.jei_version}"
+
+    compileOnly "MCMultiPart2:MCMultiPart:${project.mcmp_version}:deobf"
+    runtime "MCMultiPart2:MCMultiPart:${project.mcmp_version}"
 }
 
 processResources {

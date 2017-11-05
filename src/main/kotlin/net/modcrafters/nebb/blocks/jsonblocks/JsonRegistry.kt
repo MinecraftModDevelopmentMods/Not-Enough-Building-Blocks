@@ -20,6 +20,7 @@ import net.minecraftforge.registries.IForgeRegistry
 import net.modcrafters.nebb.MOD_ID
 import net.modcrafters.nebb.NEBBMod
 import net.modcrafters.nebb.blocks.BaseBlock
+import net.modcrafters.nebb.integrations.mcmp.MCMultiPartAddon
 import net.modcrafters.nebb.parts.BigAABB
 import net.modcrafters.nebb.parts.BlockInfo
 import net.modcrafters.nebb.parts.ComplexPartInfo
@@ -54,12 +55,17 @@ object JsonRegistry: IRegistryHandler {
                 true
             }, true, true)
 
-        this.jsonBlocks.values.forEach { it.registerBlock(registry) }
+        this.jsonBlocks.values.forEach {
+            it.registerBlock(registry)
+            MCMultiPartAddon.enqueueBlock(it)
+        }
         GameRegistry.registerTileEntity(JsonTile::class.java, ResourceLocation(MOD_ID,"jsonblock_tile").toString())
     }
 
     override fun registerItems(asm: ASMDataTable, registry: IForgeRegistry<Item>) {
-        this.jsonBlocks.values.forEach { it.registerItem(registry) }
+        this.jsonBlocks.values.forEach {
+            it.registerItem(registry)
+        }
     }
 
     override fun registerRenderers(asm: ASMDataTable) {

@@ -1,5 +1,6 @@
 {
   "type": "oriented",
+  "mcmp_slot": "center",
   "parts": {
     "MAIN": {
       "hit": [0.375, 0.0, 0.375, 0.625, 1.0, 0.625]
