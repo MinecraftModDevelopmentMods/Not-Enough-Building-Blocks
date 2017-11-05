@@ -10,6 +10,7 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
+import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraft.world.World
@@ -63,6 +64,12 @@ class MCMultiPartAddon : IMCMPAddon {
             val slot = this.block.getMultipartSlot(state)
             NEBBMod.logger.info("getSlotForPlacement:: ${pos} :: ${slot}")
             return slot
+        }
+
+        override fun getCollisionBoundingBox(world: World, pos: BlockPos, state: IBlockState): AxisAlignedBB {
+//            val aabb = this.block.getSelectedBoundingBox(state, world, pos)
+            val aabb2 = this.block.getAABBForPlacing(state)
+            return aabb2
         }
 
         override fun getBlock() = this.block

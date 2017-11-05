@@ -26,9 +26,11 @@ import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.registries.IForgeRegistry
 import net.modcrafters.nebb.MOD_ID
 import net.modcrafters.nebb.NEBBMod
+import net.modcrafters.nebb.blocks.jsonblocks.IBlockInfoProvider
 import net.modcrafters.nebb.integrations.mcmp.MCMultiPartAddon
 import net.modcrafters.nebb.parts.BigAABB
 import net.modcrafters.nebb.parts.BlockInfo
+import net.modcrafters.nebb.parts.PartInfo
 import net.ndrei.teslacorelib.blocks.MultiPartBlock
 import net.ndrei.teslacorelib.compatibility.IBlockColorDelegate
 import net.ndrei.teslacorelib.render.selfrendering.IBakery
@@ -146,5 +148,21 @@ abstract class BaseBlock<T: BaseTile>(registryName: String, private val tileClas
 
     companion object {
         val BLOCK_INFO = BlockInfoProperty("block_info")
+    }
+
+    fun getAABBForPlacing(state: IBlockState): AxisAlignedBB {
+        if (this is IBlockInfoProvider) {
+            val aabb = this.info.parts.fold<PartInfo, AxisAlignedBB?>(null) { ab1, part ->
+                part.hitBoxes.fold(ab1) { ab2, big ->
+                    if (ab2 == null) big.aabb else ab2.union(big.aabb)
+                }
+            } ?: FULL_BLOCK_AABB
+            return this.transformCollisionAABB(aabb, state)
+        }
+        return FULL_BLOCK_AABB
+    }
+
+    override fun getBoundingBox(state: IBlockState, source: IBlockAccess, pos: BlockPos): AxisAlignedBB {
+        return this.getAABBForPlacing(state)
     }
 }
