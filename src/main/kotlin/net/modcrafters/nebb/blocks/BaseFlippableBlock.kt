@@ -63,6 +63,24 @@ abstract class BaseFlippableBlock<T: BaseTile>(registryName: String, tileClass: 
         }
     }
 
+    override fun rotateBlock(world: World, pos: BlockPos, axis: EnumFacing): Boolean {
+        var state = world.getBlockState(pos)
+        if (state.block === this) {
+            val tileEntity = world.getTileEntity(pos)
+            val newFacing = state.getValue(BaseHorizontalBlock.FACING).rotateY()
+            state = state.withProperty(BaseHorizontalBlock.FACING, newFacing)
+            if (newFacing == EnumFacing.EAST)
+                state = state.withProperty(BaseFlippableBlock.FLIP_UP_DOWN, !state.getValue(BaseFlippableBlock.FLIP_UP_DOWN))
+            world.setBlockState(pos, state)
+            if (tileEntity != null) {
+                tileEntity.validate()
+                world.setTileEntity(pos, tileEntity)
+            }
+            return true
+        }
+        return false
+    }
+
     companion object {
         val FLIP_UP_DOWN = PropertyBool.create("flip_up_down")
     }
